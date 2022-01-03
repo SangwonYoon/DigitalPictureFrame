@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import java.util.*
 import kotlin.concurrent.timer
 
 class PhotoFrameActivity: AppCompatActivity() {
@@ -12,6 +13,8 @@ class PhotoFrameActivity: AppCompatActivity() {
     private val photoList = mutableListOf<Uri>()
 
     private var currentPosition = 0 // 현재 보여지고 있는 사진의 position값을 저장하는 변수
+
+    private var timer : Timer? = null
 
     private val photoImageView : ImageView by lazy{
         findViewById(R.id.photoImageView)
@@ -25,9 +28,9 @@ class PhotoFrameActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photoframe)
 
-        getPhotoUriFromIntent()
+        Log.d("photoFrame", "onCreate")
 
-        startTimer()
+        getPhotoUriFromIntent()
     }
 
     private fun getPhotoUriFromIntent(){ // intent를 통해 넘겨진 String을 Uri로 변환하여 리스트에 저장하는 함수
@@ -40,8 +43,11 @@ class PhotoFrameActivity: AppCompatActivity() {
     }
 
     private fun startTimer(){
-        timer(period = 5000){
+        timer = timer(period = 5000){
             runOnUiThread{ // timer 블록 내부는 main Thread에서 동작하는 것이 아니기 때문에 Ui 조작을 위해서는 runOnUiThread() 함수를 이용해야함
+
+                Log.d("photoFrame", "사진 변경")
+
                 val current = currentPosition
                 val next = if(photoList.size <= currentPosition + 1) 0 else currentPosition + 1
 
@@ -57,6 +63,30 @@ class PhotoFrameActivity: AppCompatActivity() {
                 currentPosition = next
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.d("photoFrame", "onStop")
+
+        timer?.cancel()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Log.d("photoFrame", "onStart")
+
+        startTimer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        Log.d("photoFrame", "onDestroy")
+
+        timer?.cancel()
     }
 
 }
